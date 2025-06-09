@@ -13,16 +13,16 @@ class Mapa:
         self.agente = agente
 
     def resetPosicao(self): #def reset(self)
-        self.agente.pos = [9,4]
+        self.agente.pos = [4,3]
         return self.agente.pos.copy()
 
     def andar(self, direcaoEscolhida): # def act(self, action):
         if direcaoEscolhida == 0: #cima
-            self.agente.pos[0] +=1
+            self.agente.pos[0] -=1
         elif direcaoEscolhida == 1: #direita
             self.agente.pos[1] +=1
         elif direcaoEscolhida == 2: #baixo
-            self.agente.pos[0] -=1
+            self.agente.pos[0] +=1
         elif direcaoEscolhida == 3: #esquerda
             self.agente.pos[1] -=1
         else:
@@ -35,15 +35,23 @@ class Mapa:
 
 
         #LOGICA DE LIMITAÇÃO DE PAREDES DO MAPA
-        if ((5 <= self.agente.pos[0] >= 9) and ( 4 <= self.agente.pos[1] <= 7)):
+
+        if((self.agente.pos[1] < 4) or (self.agente.pos[1] > 7) ) and ( self.agente.pos[0] < 5) :
+            print("#IF 1")
+            self.agente.pos[0] = min(4, max(0, self.agente.pos[0]))
+            self.agente.pos[1] = min(self.larguraMapa-1, max(0, self.agente.pos[1]))
+        elif((5 <= self.agente.pos[0] ) and ( 4 <= self.agente.pos[1] <= 7)):
+            print("#IF 2")
             self.agente.pos[0] = min(self.alturaMapa - 1, max(0, self.agente.pos[0]))
             self.agente.pos[1] = min(7, max(4, self.agente.pos[1]))
-        elif(self.agente.pos[1]>=4 and self.agente.pos[1]<=7):
+        elif(self.agente.pos[0]>=5 and  (7 < self.agente.pos[1] or self.agente.pos[1]<4) ):
+            print("#IF 3")
             self.agente.pos[0] = min(self.alturaMapa-1, max(0, self.agente.pos[0]))
+            self.agente.pos[1] = min(7, max(4, self.agente.pos[1]))
+        elif (self.agente.pos[0] < 5):
+            print("#IF 4")
+            self.agente.pos[0] = min(self.alturaMapa - 1, max(0, self.agente.pos[0]))
             self.agente.pos[1] = min(self.larguraMapa-1, max(0, self.agente.pos[1]))
-        else:
-            self.agente.pos[0] = min(4, max(0, self.agente.pos[0]))
-            self.agente.pos[1] = min(self.larguraMapa - 1, max(0, self.agente.pos[1]))
 
         recompensa = 0
         final = False
@@ -73,3 +81,10 @@ class Mapa:
             final = True
         return self.agente.pos.copy(), recompensa, final
 
+
+# / def __init__(self, agente, width=12, height=10, tropecoValor = 0):
+
+agt = Agente()
+mp = Mapa(agt,12,10,0)
+
+mp.resetPosicao()
