@@ -78,24 +78,26 @@ class Mapa:
         return self.agente.pos.copy(), recompensa, final
 
 class QLearning:
-    def __init__(self, epsilon=0.1, alpha=0.1, gamma=0.9, init=0, w=12, h=10, a=4):
+    def __init__(self, epsilon=0.1, alpha=0.1, gamma=0.9, valorInicial=0, w=12, h=10, a=4):
         self.epsilon = epsilon #TAXA DE ALEATORIEDADE
         self.alpha = alpha #TAXA DE APRENDIZAGEM
         self.gamma = gamma #FATOR DE DESCONTO CONFORME ATUALIZA ESTADOS ANTERIRES
         self.larguraMapa = w
         self.alturaMapa = h
-        self.a = a
-        self.init = init
+        self.acoes = a
+        self.inicialQtable = valorInicial
         self.criaQTable()
 
     def criaQTable(self):  # reinicia a Qtable com 0,0,0,0 (#up #right, #down #left)
         #formando uma matriz em "3D"
-        self.qtable = [[[self.init] * self.a for j in range(self.larguraMapa)] for i in range(self.alturaMapa)]
+        self.qtable = [[[self.inicialQtable] * self.acoes for j in range(self.larguraMapa)] for i in range(self.alturaMapa)]
 
-    def printQTable(self):# self.qtable[i][j][X] i,j = posicao no mapa | X = valor da ação escolhida
+    def printQTable(self):  # self.qtable[i][j][X] i,j = posicao no mapa | X = valor da ação escolhida
         print("Pos   |   Up   |  Right |  Down  |  Left  |")
         for i in range(self.alturaMapa):
             for j in range(self.larguraMapa):
+                if i >= 5 and (0 <= j <= 3 or 8 <= j <= 11):
+                    continue
                 print("{:>2},{:<2} | {:>6} | {:>6} | {:>6} | {:>6} |".format(
                     i, j,
                     self.qtable[i][j][0],
@@ -104,10 +106,41 @@ class QLearning:
                     self.qtable[i][j][3]
                 ))
 
+    def getMaximoPosicao(self,pos):#retorna o maior valor entre 0|1|2|3 na posicao Y X da qtable
+        return max(self.qtable[pos[0],pos[1]])
+
+    def getMelhorAcao(self,pos):
+        posicao = self.qtable[pos[0],pos[1]] #vetor de valores da Qtable
+        m = max(posicao) #valores mais altos
+        melhoresCaminhos =  [i for i, j in enumerate(posicao) if j == m] #cria um vetor de melhoresEscolhas caso
+        #possua mais de um caminho com o valor igual
+        return choice(melhoresCaminhos) #escolhe um de forma aleatoria com choice
+
+    def getAcaoAleatoria(self):
+        return int (random() * self.acoes)
+
+    def getAction(self,pos):
+        if random() < self.epsilon: #epsilion é a taxa de "tropeço" ou "aleatoriedade do ambiente" que pode ocorrer
+            return self.getAcaoAleatoria()
+        else:
+            return self.getMelhorAcao()
+
+    def atualizaQtable(self,posOld,acao,posNew,recompensa,final):
+        if final:
+            self.qtable[posOld[0]][posOld[1]][acao] += self.alpha * (recompensa - self.qtable[posOld[0]][posOld[1]][acao])
+        else:
+            self.qtable[posOld[0]][posOld[1]][acao] += self.alpha * (recompensa + self.gamma * self.getMaximoPosicao(posNew) - self.qtable[posOld[0]][posOld[1]][acao])
+
 agt = Agente()
-mp = Mapa(agt,12,10,0)
+alturaMapa = 10
+larguraMapa = 12
+
+
+mp = Mapa(agt,larguraMapa,alturaMapa,0)
+
+episodios = 100
+ql = QLearning(epsilon=0.3, alpha=0.2, valorInicial=0, w=larguraMapa, h=alturaMapa)
+ql.printQTable()
 
 mp.resetPosicao()
 
-ql = QLearning()
-ql.printQTable()
