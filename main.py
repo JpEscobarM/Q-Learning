@@ -1,5 +1,5 @@
 from random import random, choice, Random
-
+import pygame
 
 class Agente:
     def __init__(self):
@@ -135,7 +135,6 @@ agt = Agente()
 alturaMapa = 10
 larguraMapa = 12
 
-
 mp = Mapa(agt,larguraMapa,alturaMapa,0)
 
 ql = QLearning(epsilon=0.3, alpha=0.2, valorInicial=0, w=larguraMapa, h=alturaMapa)
@@ -153,3 +152,47 @@ for i in range(episodios):
         if final:
             break
 ql.printQTable()
+
+#PYGAME
+
+pygame.init()
+tela = pygame.display.set_mode((1000, 720))
+clock = pygame.time.Clock()
+running = True
+
+#JOGADOR: ???
+
+linhas, colunas = alturaMapa,larguraMapa
+tamanhoBloco = 50
+
+totalLarguraMatriz = colunas * tamanhoBloco
+totalAlturaMatriz = linhas * tamanhoBloco
+
+
+set_x = (tela.get_width()  - totalLarguraMatriz) // 2
+set_y = (tela.get_height() - totalAlturaMatriz) // 2
+
+#RODA A TELA:
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    tela.fill("black")
+
+    for i in range (linhas):
+        for j in range (colunas):
+            rect = pygame.Rect(
+                set_x + j * tamanhoBloco,
+                set_y + i * tamanhoBloco,
+                tamanhoBloco,
+                tamanhoBloco
+            )
+            pygame.draw.rect(tela,"white",rect,width=1)
+
+    pygame.display.flip()
+
+    clock.tick(60)
+
+pygame.quit()
+
