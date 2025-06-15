@@ -107,10 +107,10 @@ class QLearning:
                 ))
 
     def getMaximoPosicao(self,pos):#retorna o maior valor entre 0|1|2|3 na posicao Y X da qtable
-        return max(self.qtable[pos[0],pos[1]])
+        return max(self.qtable[pos[0]][pos[1]])
 
     def getMelhorAcao(self,pos):
-        posicao = self.qtable[pos[0],pos[1]] #vetor de valores da Qtable
+        posicao = self.qtable[pos[0]][pos[1]] #vetor de valores da Qtable
         m = max(posicao) #valores mais altos
         melhoresCaminhos =  [i for i, j in enumerate(posicao) if j == m] #cria um vetor de melhoresEscolhas caso
         #possua mais de um caminho com o valor igual
@@ -119,11 +119,11 @@ class QLearning:
     def getAcaoAleatoria(self):
         return int (random() * self.acoes)
 
-    def getAction(self,pos):
+    def getAcao(self,pos):
         if random() < self.epsilon: #epsilion é a taxa de "tropeço" ou "aleatoriedade do ambiente" que pode ocorrer
             return self.getAcaoAleatoria()
         else:
-            return self.getMelhorAcao()
+            return self.getMelhorAcao(pos)
 
     def atualizaQtable(self,posOld,acao,posNew,recompensa,final):
         if final:
@@ -138,9 +138,18 @@ larguraMapa = 12
 
 mp = Mapa(agt,larguraMapa,alturaMapa,0)
 
-episodios = 100
 ql = QLearning(epsilon=0.3, alpha=0.2, valorInicial=0, w=larguraMapa, h=alturaMapa)
+
+
+episodios = 1000
+
+for i in range(episodios):
+    posicaoAtual = mp.resetPosicao()
+    for passos in range(larguraMapa * alturaMapa):#passos = h*w ou seja, o maximo de passos que o agente pode dar por episodio
+        acao = ql.getAcao(posicaoAtual)
+        novaPosicao, recompensa, final = mp.andar(acao)
+        ql.atualizaQtable(posicaoAtual,acao,novaPosicao,recompensa,final)
+        posicaoAtual = novaPosicao
+        if final:
+            break
 ql.printQTable()
-
-mp.resetPosicao()
-
