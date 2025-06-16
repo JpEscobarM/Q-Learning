@@ -154,7 +154,7 @@ larguraMapa = 12
 
 mp = Mapa(agt,larguraMapa,alturaMapa,0)
 
-ql = QLearning(epsilon=0.3, alpha=0.5, valorInicial=0, w=larguraMapa, h=alturaMapa)
+ql = QLearning(epsilon=0.3, alpha=0.5, valorInicial=1, w=larguraMapa, h=alturaMapa)
 
 episodios = 1000
 
