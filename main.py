@@ -161,6 +161,20 @@ episodios = 1000
 pygame.init()
 screen = pygame.display.set_mode(SCREEN_SIZE)
 
+imgChao = pygame.image.load("./assets/img/tile_0001.png")
+imgRecompensa = pygame.image.load("./assets/img/tile_0029.png")
+imgParede = pygame.image.load("./assets/img/tile_0005.png")
+imgPersonagem = pygame.image.load("./assets/img/tile_0019.png")
+imgPenalidade = pygame.image.load("./assets/img/tile_0105.png")
+
+
+
+chao = pygame.transform.scale(imgChao, (RECT_WIDTH, RECT_HEIGHT))
+recompensaIMG =  pygame.transform.scale(imgRecompensa, (RECT_WIDTH, RECT_HEIGHT))
+parede =  pygame.transform.scale(imgParede, (RECT_WIDTH, RECT_HEIGHT))
+personagem = pygame.transform.scale(imgPersonagem, (RECT_WIDTH, RECT_HEIGHT))
+penalidade =   pygame.transform.scale(imgPenalidade, (RECT_WIDTH, RECT_HEIGHT))
+
 font = pygame.font.Font('freesansbold.ttf', 12)
 def desenhar_mapa(qlearning, mapa, agente):
     screen.fill(WHITE)
@@ -171,47 +185,50 @@ def desenhar_mapa(qlearning, mapa, agente):
 
             cor = WHITE
             valor = 0
-
+            screen.blit(chao, (x * RECT_WIDTH, y * RECT_HEIGHT))
             if (0 <= x <= 3) or (x >= 8 and y <= 11):
                 if 5 <= y <= 9:
                     valor = -1000.0
-                    cor = SAND
+                    screen.blit(parede, (x * RECT_WIDTH, y * RECT_HEIGHT))
 
             if (y == 4) and (x == 11):
                 valor = 100
-                cor = GREEN
+                screen.blit(recompensaIMG, (x * RECT_WIDTH, y * RECT_HEIGHT))
+
 
             elif (y == 0) and (x == 4 or x == 11):
                 valor = -100
-                cor = GRAY
+                screen.blit(penalidade, (x * RECT_WIDTH, y * RECT_HEIGHT))
 
             elif (y == 1) and (x == 1 or x == 11):
                 valor = -100
-                cor = GRAY
+                screen.blit(penalidade, (x * RECT_WIDTH, y * RECT_HEIGHT))
 
             elif (y == 2) and (x in [0, 2, 6, 8, 9]):
                 valor = -100
-                cor = GRAY
+                screen.blit(penalidade, (x * RECT_WIDTH, y * RECT_HEIGHT))
 
             elif (y == 3) and (x in [1, 8]):
                 valor = -100
-                cor = GRAY
+                screen.blit(penalidade, (x * RECT_WIDTH, y * RECT_HEIGHT))
 
             elif (y == 5) and (x == 6):
                 valor = -100
-                cor = GRAY
+                screen.blit(penalidade, (x * RECT_WIDTH, y * RECT_HEIGHT))
 
             elif (y == 8) and (x == 6):
                 valor = -100
-                cor = GRAY
+                screen.blit(penalidade, (x * RECT_WIDTH, y * RECT_HEIGHT))
 
             elif x == 4 and y == 9:
                 cor = RED
 
-            if [y, x] == agente.pos:
-                cor = BLUE
 
-            pygame.draw.rect(screen, cor, rect)
+
+            if [y, x] == agente.pos:
+                screen.blit(personagem, (x * RECT_WIDTH, y * RECT_HEIGHT))
+
+
             pygame.draw.rect(screen, BLACK, rect, 1)
 
             try:
@@ -225,7 +242,7 @@ def desenhar_mapa(qlearning, mapa, agente):
                 pass
 
     pygame.display.flip()
-    clock.tick(500)
+    clock.tick(5)
 
 for i in range(episodios):
     posicaoAtual = mp.resetPosicao()
