@@ -164,6 +164,7 @@ screen = pygame.display.set_mode(SCREEN_SIZE)
 font = pygame.font.Font('freesansbold.ttf', 12)
 def desenhar_mapa(qlearning, mapa, agente):
     screen.fill(WHITE)
+    clock = pygame.time.Clock()
     for y in range(alturaMapa):
         for x in range(larguraMapa):
             rect = Rect(x * RECT_WIDTH, y * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
@@ -224,6 +225,7 @@ def desenhar_mapa(qlearning, mapa, agente):
                 pass
 
     pygame.display.flip()
+    clock.tick(500)
 
 for i in range(episodios):
     posicaoAtual = mp.resetPosicao()
@@ -238,7 +240,7 @@ for i in range(episodios):
         ql.atualizaQtable(posicaoAtual, acao, novaPosicao, recompensa, final)
         posicaoAtual = novaPosicao
         desenhar_mapa(ql, mp, agt)
-        #time.sleep(0.05)
+
 
         if final:
             break
