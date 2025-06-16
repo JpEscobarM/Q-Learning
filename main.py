@@ -1,5 +1,22 @@
 from random import random, choice, Random
 import pygame
+from pygame import Rect
+
+BLACK = (0, 0, 0)
+GRAY = (127, 127, 127)
+WHITE = (255, 255, 255)
+RED = (232, 63, 66)
+GREEN = (17, 158, 32)
+BLUE = (37, 150, 190)
+SAND= (234,182,118)
+
+HEIGHT = 10
+WIDTH = 12
+
+RECT_HEIGHT = 60
+RECT_WIDTH = 60
+
+SCREEN_SIZE = 720, 600
 
 class Agente:
     def __init__(self):
@@ -15,52 +32,6 @@ class Mapa:
     def resetPosicao(self): #def reset(self)
         self.agente.pos = [9,4]
         return self.agente.pos.copy()
-
-    def getPosicaoAgente(self):
-        return self.agente.pos.copy()
-    def renderiza(self):
-        for i in range(linhas):
-            for j in range(colunas):
-                if i >= 5 and 0 <= j < 4:
-                    continue
-                elif i >= 5 and 8 <= j < 12:
-                    continue
-
-                rect = pygame.Rect(
-                    set_x + j * tamanhoBloco,
-                    set_y + i * tamanhoBloco,
-                    tamanhoBloco,
-                    tamanhoBloco
-                )
-
-                if (i == 4) and (j == 11):
-                    pygame.draw.rect(tela, "green", rect)
-                elif (i == 0) and (j in [4, 11]):
-                    pygame.draw.rect(tela, "purple", rect)
-                elif (i == 1) and (j in [1, 11]):
-                    pygame.draw.rect(tela, "purple", rect)
-                elif (i == 2) and (j in [0, 2, 6, 8, 9]):
-                    pygame.draw.rect(tela, "purple", rect)
-                elif (i == 3) and (j in [1, 8]):
-                    pygame.draw.rect(tela, "purple", rect)
-                elif (i == 5) and (j == 6):
-                    pygame.draw.rect(tela, "purple", rect)
-                elif (i == 8) and (j == 6):
-                    pygame.draw.rect(tela, "purple", rect)
-                else:
-                    pygame.draw.rect(tela, "white", rect, width=1)
-
-        posAgente = MAPA.getPosicaoAgente()
-        rectAgente = pygame.Rect(
-            set_x + posAgente[1] * tamanhoBloco,
-            set_y + posAgente[0] * tamanhoBloco,
-            tamanhoBloco,
-            tamanhoBloco
-        )
-        pygame.draw.rect(tela, "red", rectAgente)
-        pygame.display.flip()
-        clock.tick(5)
-
 
     def andar(self, direcaoEscolhida): # def act(self, action):
         if direcaoEscolhida == 0: #cima
@@ -177,116 +148,100 @@ class QLearning:
         else:
             self.qtable[posOld[0]][posOld[1]][acao] += self.alpha * (recompensa + self.gamma * self.getMaximoPosicao(posNew) - self.qtable[posOld[0]][posOld[1]][acao])
 
-AGENTE = Agente()
+agt = Agente()
 alturaMapa = 10
 larguraMapa = 12
 
-MAPA = Mapa(AGENTE, larguraMapa, alturaMapa, 0)
+mp = Mapa(agt,larguraMapa,alturaMapa,0)
 
-QLEARNING = QLearning(epsilon=0.3, alpha=0.2, valorInicial=0, w=larguraMapa, h=alturaMapa)
+ql = QLearning(epsilon=0.3, alpha=0.5, valorInicial=0, w=larguraMapa, h=alturaMapa)
 
-MAPA.resetPosicao()
 episodios = 1000
 
-# episodios = 1000
-#
-# for i in range(episodios):
-#     posicaoAtual = mp.resetPosicao()
-#     for passos in range(larguraMapa * alturaMapa):#passos = h*w ou seja, o maximo de passos que o agente pode dar por episodio
-#         acao = ql.getAcao(posicaoAtual)
-#         novaPosicao, recompensa, final = mp.andar(acao)
-#         ql.atualizaQtable(posicaoAtual,acao,novaPosicao,recompensa,final)
-#         posicaoAtual = novaPosicao
-#         if final:
-#             break
-# ql.printQTable()
-
-#PYGAME
-
 pygame.init()
-tela = pygame.display.set_mode((1000, 720))
-clock = pygame.time.Clock()
-running = True
+screen = pygame.display.set_mode(SCREEN_SIZE)
 
-#JOGADOR: ???
+font = pygame.font.Font('freesansbold.ttf', 12)
+def desenhar_mapa(qlearning, mapa, agente):
+    screen.fill(WHITE)
+    for y in range(alturaMapa):
+        for x in range(larguraMapa):
+            rect = Rect(x * RECT_WIDTH, y * RECT_HEIGHT, RECT_WIDTH, RECT_HEIGHT)
 
-linhas, colunas = alturaMapa,larguraMapa
-tamanhoBloco = 50
+            cor = WHITE
+            valor = 0
 
-totalLarguraMatriz = colunas * tamanhoBloco
-totalAlturaMatriz = linhas * tamanhoBloco
+            if (0 <= x <= 3) or (x >= 8 and y <= 11):
+                if 5 <= y <= 9:
+                    valor = -1000.0
+                    cor = SAND
 
+            if (y == 4) and (x == 11):
+                valor = 100
+                cor = GREEN
 
-set_x = (tela.get_width()  - totalLarguraMatriz) // 2
-set_y = (tela.get_height() - totalAlturaMatriz) // 2
+            elif (y == 0) and (x == 4 or x == 11):
+                valor = -100
+                cor = GRAY
 
+            elif (y == 1) and (x == 1 or x == 11):
+                valor = -100
+                cor = GRAY
 
+            elif (y == 2) and (x in [0, 2, 6, 8, 9]):
+                valor = -100
+                cor = GRAY
 
-#RODA A TELA:
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+            elif (y == 3) and (x in [1, 8]):
+                valor = -100
+                cor = GRAY
 
+            elif (y == 5) and (x == 6):
+                valor = -100
+                cor = GRAY
 
+            elif (y == 8) and (x == 6):
+                valor = -100
+                cor = GRAY
 
-    #QL:
-    for i in range(episodios):
-        posicaoAtual = MAPA.resetPosicao()
-        for passos in range(larguraMapa * alturaMapa):#passos = h*w ou seja, o maximo de passos que o agente pode dar por episodio
-            acao = QLEARNING.getAcao(posicaoAtual)
-            novaPosicao, recompensa, final = MAPA.andar(acao)
-            QLEARNING.atualizaQtable(posicaoAtual,acao,novaPosicao,recompensa,final)
-            posicaoAtual = novaPosicao
+            elif x == 4 and y == 9:
+                cor = RED
 
-            tela.fill("black")
-            for i in range(linhas):
-                for j in range(colunas):
-                    if i >= 5 and 0 <= j < 4:
-                        continue
-                    elif i >= 5 and 8 <= j < 12:
-                        continue
+            if [y, x] == agente.pos:
+                cor = BLUE
 
-                    rect = pygame.Rect(
-                        set_x + j * tamanhoBloco,
-                        set_y + i * tamanhoBloco,
-                        tamanhoBloco,
-                        tamanhoBloco
-                    )
+            pygame.draw.rect(screen, cor, rect)
+            pygame.draw.rect(screen, BLACK, rect, 1)
 
+            try:
+                if valor not in [-100, 100, -1000]:
+                    valor = qlearning.getMaximoPosicao([y, x])
 
-                    if (i == 4) and (j == 11):
-                        pygame.draw.rect(tela, "green", rect)
-                    elif (i == 0) and (j in [4, 11]):
-                        pygame.draw.rect(tela, "purple", rect)
-                    elif (i == 1) and (j in [1, 11]):
-                        pygame.draw.rect(tela, "purple", rect)
-                    elif (i == 2) and (j in [0, 2, 6, 8, 9]):
-                        pygame.draw.rect(tela, "purple", rect)
-                    elif (i == 3) and (j in [1, 8]):
-                        pygame.draw.rect(tela, "purple", rect)
-                    elif (i == 5) and (j == 6):
-                        pygame.draw.rect(tela, "purple", rect)
-                    elif (i == 8) and (j == 6):
-                        pygame.draw.rect(tela, "purple", rect)
-                    else:
-                        pygame.draw.rect(tela, "white", rect, width=1)
+                if valor != -1000:
+                    texto = font.render(f"{valor:.2f}", True, BLACK)
+                    screen.blit(texto, texto.get_rect(center=rect.center))
+            except:
+                pass
 
-            posAgente = MAPA.getPosicaoAgente()
-            rectAgente = pygame.Rect(
-                set_x + posAgente[1] * tamanhoBloco,
-                set_y + posAgente[0] * tamanhoBloco,
-                tamanhoBloco,
-                tamanhoBloco
-            )
-            pygame.draw.rect(tela, "red", rectAgente)
-            pygame.display.flip()
-            clock.tick(100)
+    pygame.display.flip()
 
-            if final:
-                break
+for i in range(episodios):
+    posicaoAtual = mp.resetPosicao()
+    for passos in range(larguraMapa * alturaMapa):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
 
+        acao = ql.getAcao(posicaoAtual)
+        novaPosicao, recompensa, final = mp.andar(acao)
+        ql.atualizaQtable(posicaoAtual, acao, novaPosicao, recompensa, final)
+        posicaoAtual = novaPosicao
+        desenhar_mapa(ql, mp, agt)
+        #time.sleep(0.05)
 
+        if final:
+            break
 
 pygame.quit()
-QLEARNING.printQTable()
+ql.printQTable()
