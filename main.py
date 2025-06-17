@@ -237,12 +237,23 @@ def desenhar_mapa(qlearning, mapa, agente):
 
                 if valor != -1000:
                     texto = font.render(f"{valor:.2f}", True, BLACK)
-                    screen.blit(texto, texto.get_rect(center=rect.center))
+                    texto_rect =  texto.get_rect(center=rect.center)
+                    for dx in [-1, 0, 1]:
+                        for dy in [-1, 0, 1]:
+                            if dx != 0 or dy != 0:  # evita o centro
+                                borda_surface = font.render(f"{valor:.2f}", True, WHITE)
+                                borda_rect = texto_rect.copy()
+                                borda_rect.x += dx
+                                borda_rect.y += dy
+                                screen.blit(borda_surface, borda_rect)
+
+
+                    screen.blit(texto, texto_rect)
             except:
                 pass
 
     pygame.display.flip()
-    clock.tick(5)
+    clock.tick(20)
 
 for i in range(episodios):
     posicaoAtual = mp.resetPosicao()
@@ -251,12 +262,12 @@ for i in range(episodios):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-
+        desenhar_mapa(ql, mp, agt)
         acao = ql.getAcao(posicaoAtual)
         novaPosicao, recompensa, final = mp.andar(acao)
         ql.atualizaQtable(posicaoAtual, acao, novaPosicao, recompensa, final)
         posicaoAtual = novaPosicao
-        desenhar_mapa(ql, mp, agt)
+
 
 
         if final:
