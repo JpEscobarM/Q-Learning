@@ -154,12 +154,15 @@ larguraMapa = 12
 
 mp = Mapa(agt,larguraMapa,alturaMapa,0)
 
+
 ql = QLearning(epsilon=0.3, alpha=0.5, valorInicial=0, w=larguraMapa, h=alturaMapa)
+
 
 episodios = 1000
 
 pygame.init()
 screen = pygame.display.set_mode(SCREEN_SIZE)
+
 clock = pygame.time.Clock()
 
 font = pygame.font.Font('freesansbold.ttf', 12)
@@ -227,6 +230,7 @@ def desenhar_mapa(qlearning, mapa, agente):
     pygame.display.flip()
     clock.tick(5)
 
+
 for i in range(episodios):
     posicaoAtual = mp.resetPosicao()
     for passos in range(larguraMapa * alturaMapa):
@@ -242,7 +246,10 @@ for i in range(episodios):
         desenhar_mapa(ql, mp, agt)
 
 
+
         if final:
             break
 
 pygame.quit()
+
+ql.printQTable()
